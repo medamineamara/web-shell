@@ -8,7 +8,7 @@ wss.on('connection', (ws) => {
 
     const duplex = createWebSocketStream(ws, { encoding: 'utf8' });
 
-    const proc = pty.spawn('docker', ['run', "--rm", "-ti", "ubuntu", "bash"], { name: 'xterm-color' });
+    const proc = pty.spawn('node', { name: 'xterm-color' });
 
     const onData = proc.onData((data) => duplex.write(data));
 
