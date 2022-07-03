@@ -1,30 +1,61 @@
-import pty from 'node-pty';
-import { createWebSocketStream, WebSocketServer } from 'ws';
+import pty from "node-pty";
+import { createWebSocketStream, WebSocketServer } from "ws";
 
-const wss = new WebSocketServer({ port: 4000 },()=>{
-    console.log("listening on port 4000")
+import path from "path";
+import cors from 'cors';
+
+// ###############
+// Creating Server
+// ###############
+import http from "http";
+
+import express from "express";
+var app = express();
+
+const server = http.createServer(app);
+server.listen(3000, () => {
+  console.log("listening on port 3000");
 });
 
-wss.on('connection', (ws) => {
-    console.log('new connection');
+// ######
+// SOCKET
+// ######
+const wss = new WebSocketServer({ server, path: "/socket" });
 
-    const duplex = createWebSocketStream(ws, { encoding: 'utf8' });
+wss.on("connection", (ws) => {
+  console.log("new connection");
 
-    const proc = pty.spawn('sh',[], { name: 'xterm-color' });
+  const duplex = createWebSocketStream(ws, { encoding: "utf8" });
 
-    const onData = proc.onData((data) => duplex.write(data));
+  const proc = pty.spawn("sh", [], { name: "xterm-color" });
 
-    const exit = proc.onExit(() => {
-        console.log("process exited");
-        onData.dispose();
-        exit.dispose();
-    });
+  const onData = proc.onData((data) => duplex.write(data));
 
-    duplex.on('data', (data) => proc.write(data.toString()));
+  const exit = proc.onExit(() => {
+    console.log("process exited");
+    onData.dispose();
+    exit.dispose();
+  });
 
-    ws.on('close', function () {
-        console.log('stream closed');
-        proc.kill();
-        duplex.destroy();
-    });
+  duplex.on("data", (data) => proc.write(data.toString()));
+
+  ws.on("close", function () {
+    console.log("stream closed");
+    proc.kill();
+    duplex.destroy();
+  });
+});
+
+// ###########
+// Serve index
+// ###########
+const __dirname = path.resolve();
+
+app.use(express.static(__dirname + '/'));
+app.use(cors())
+
+app.get("/", (req, res) => {
+  const __dirname = path.resolve();
+
+  res.sendFile(path.join(__dirname, "/index.html"));
 });
