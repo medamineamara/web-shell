@@ -6,8 +6,8 @@ COPY . .
 
 RUN npm install
 
-RUN node server.mjs &
 
-RUN npm i -g serve 
+RUN npm i -g serve
 
-CMD ["serve"]
+
+CMD ["sh", "-c", "npm start & serve"]

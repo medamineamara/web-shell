@@ -17,7 +17,7 @@
         }
     </style>
     <script type="module" defer>
-        const ws = new WebSocket('ws://localhost:3000');
+        const ws = new WebSocket('ws://localhost:4000');
         const term = new Terminal();
         term.open(document.getElementById('terminal'));
         term.onData((data) => ws.send(data));

@@ -1,14 +1,16 @@
 import pty from 'node-pty';
 import { createWebSocketStream, WebSocketServer } from 'ws';
 
-const wss = new WebSocketServer({ port: 3000 });
+const wss = new WebSocketServer({ port: 4000 },()=>{
+    console.log("listening on port 4000")
+});
 
 wss.on('connection', (ws) => {
     console.log('new connection');
 
     const duplex = createWebSocketStream(ws, { encoding: 'utf8' });
 
-    const proc = pty.spawn('node', { name: 'xterm-color' });
+    const proc = pty.spawn('sh',[], { name: 'xterm-color' });
 
     const onData = proc.onData((data) => duplex.write(data));
 
